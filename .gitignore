@@ -1,0 +1,19 @@
+# Data
+data/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Node
+node_modules/
+app/.next/
+
+# OS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
