@@ -1,0 +1,6 @@
+music_dir: data/music
+output_dir: data
+clip_min_s: 10
+clip_max_s: 15
+demucs_model: htdemucs
+demucs_path: /Users/ws/.pyenv/versions/3.11.11/bin/demucs

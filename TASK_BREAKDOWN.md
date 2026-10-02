@@ -4,66 +4,107 @@ Evolving document. Tasks are grouped by stage. Each task is a committable unit o
 
 ## Stage 0: Project Setup
 
-- [ ] Init git repo, .gitignore (data/, .venv/, __pycache__/, node_modules/)
-- [ ] Create project directory structure (pipeline/, app/, analysis/, data/, tests/)
-- [ ] Set up Python virtualenv + requirements.txt
-- [ ] Verify demucs, ffmpeg, yt-dlp are accessible from the venv
+- [x] Init git repo, .gitignore (data/music/, data/clips/, .venv/, __pycache__/, node_modules/)
+- [x] Create project directory structure (pipeline/, app/, analysis/, data/, tests/)
+- [x] `uv init --python 3.13` — create pyproject.toml + uv-managed Python 3.13
+- [x] `uv add mutagen librosa soundfile numpy pyyaml`
+- [x] Fix demucs: use `--mp3` output flag to bypass broken torchcodec (torchaudio.save incompatibility)
+- [x] Verify: `uv run python -c "import mutagen, librosa"` works
+- [x] Verify: `demucs --help` works (pyenv 3.11, full path in config.yaml)
+- [x] Verify: `ffmpeg -version` works
 
 ## Stage 1: Data Pipeline
 
+### 1.0 Common Utilities
+
+- [x] `pipeline/common/config.py`: load config.yaml, return frozen dataclass (music_dir, output_dir, clip_min_s, clip_max_s, demucs_model)
+- [x] `pipeline/common/manifest.py`: Track dataclass, read_manifest, write_manifest, merge_manifest (JSONL)
+- [x] `pipeline/common/logging_setup.py`: setup_logging(name, log_file)
+- [x] `pipeline/config.yaml`: minimal config
+- [x] Tests: manifest round-trip, idempotent merge, track_id stability
+
 ### 1.1 Discover
 
-- [ ] Locate the network SSD, confirm mount path
-- [ ] Write `01_discover.py`: scan for audio files, read metadata via mutagen, build `data/manifest/tracks.jsonl`
-- [ ] Test: run against a small subdirectory, verify manifest output shape
-- [ ] Load Rolling Stones 500 list as a filter/priority for initial batch
+- [x] Write `01_discover.py`: walk music_dir, read ID3 via mutagen, write `data/manifest/tracks.jsonl`
+- [x] Handle: skip non-audio files (.jpg, .ini), use embedded tags not folder names
+- [x] Idempotent: merge with existing manifest by track_id
+- [x] CLI: `--config`, `--limit N` for testing
+- [x] Test: run against a small subdirectory (5 tracks), verify manifest shape
+- [x] Run: full 155-track discovery
 
 ### 1.2 Select Section
 
-- [ ] Install librosa, test audio loading on a sample track
-- [ ] Write `02_select_section.py`: slide window, score (energy, vocal prominence, beat alignment, novelty), pick best 10-15s
-- [ ] Test: run on 3-5 known songs, verify selected sections are musically sensible (chorus/hook)
-- [ ] Output: append `section_start`, `section_end` to manifest entries
+- [x] Write `02_select_section.py` (v1): load via librosa, compute smoothed RMS, slide 10-15s window, pick highest-energy section in [10%, 85%] of track
+- [x] Output: append `section_start`, `section_end` to manifest
+- [x] Idempotent: skip tracks that already have sections
+- [x] CLI: `--limit N`, `--track-id ID`
+- [ ] Test: run on 3-5 known songs, listen to clips, verify musically sensible
+- [ ] v2 (after listening): add spectral novelty + beat alignment to scoring
+- [ ] Run: full 155-track section selection
 
-### 1.3 Separate
+### 1.3 Trim
 
-- [ ] Write `03_separate.py`: ffmpeg trim → demucs → rename → convert to mp3
-- [ ] Test: run on one track, verify output files exist and are valid audio
-- [ ] Handle: already-processed tracks (skip if outputs exist)
+- [x] Write `03_trim.py`: ffmpeg -ss/-t → 10-15s 16-bit WAV at 44.1kHz stereo → `data/clips/{track_id}.wav`
+- [x] Idempotent: skip if output exists
+- [x] Test: run on 3 tracks, verify file exists, correct duration
+- [ ] Run: full 155-track trim
 
-### 1.4 Transcribe
+### 1.4 Separate
 
-- [ ] Install faster-whisper, verify model download works
-- [ ] Write `04_transcribe.py`: load vocal stem, transcribe, save text
-- [ ] Test: run on 2-3 vocal stems, verify transcription quality is acceptable
-- [ ] Output: `transcription.txt` per track
+- [x] Write `04_separate.py`: shell out to `demucs -n htdemucs -d mps --two-stems=vocals --mp3`, rename outputs
+- [x] Output: `{track_id}_vocal.mp3` + `{track_id}_instrumental.mp3`
+- [x] Idempotent: skip if outputs exist
+- [ ] Handle: MPS fallback to CPU if demucs fails
+- [x] Test: run on 5 clips, verify outputs, listen (vocals removed)
+- [ ] Run: full 155-track separation
 
-### 1.5 Verify Lyrics
+### 1.5 Validate
 
-- [ ] Choose lyrics API/source (Genius? MusicBrainz? Other?)
-- [ ] Write `05_verify_lyrics.py`: match transcription against source, store verified text + confidence score
-- [ ] Test: verify 5 tracks, confirm matches are correct
-- [ ] Output: `lyrics.txt` per track
+- [ ] End-to-end: all 4 steps on 155 tracks
+- [ ] Listen to 15-20 clips across albums/genres
+- [ ] Iterate on section selection scoring if needed
+- [ ] Verify demucs quality (clean vocal removal)
 
-### 1.6 Find Covers
+### 1.6 Transcribe
 
-- [ ] Write `06_find_covers.py`: query MusicBrainz (or chosen service) for cover versions
+- [x] Install faster-whisper (medium.en, int8, CPU)
+- [x] Write `05_transcribe.py`: load vocal stem, transcribe with beam_size=5, save segmented text
+- [x] Test: run on 5 vocal stems, quality is "good enough" for verification (not perfect for singing)
+- [x] Output: `{track_id}_transcript.txt` per track
+
+### 1.7 Verify Lyrics
+
+- [x] Choose lyrics source: **LRCLIB** (free, no API key, synced lyrics with per-line timestamps)
+- [x] Write `06_verify_lyrics.py`: search LRCLIB by title+artist, extract section lines via timestamp matching
+- [x] Test: verify 5 tracks — 4/5 matched correctly, 1 matched to a cover (same lyrics)
+- [x] Output: `{track_id}_lyrics.txt` per track (section lines + full lyrics)
+- [ ] Run on full 155-track batch, check coverage rate (expect some misses)
+
+### 1.8 Find Covers (later)
+
+- [ ] Write `07_find_covers.py`: query MusicBrainz for cover versions
 - [ ] Test: run on 5 well-known songs, verify cover list is sensible
-- [ ] Threshold logic: 3-4 default, 6-8 for heavily covered songs
 - [ ] Output: `covers.json` per track
 
-### 1.7 Ingest Covers
+### 1.9 Ingest Covers (later)
 
-- [ ] Write `07_ingest_covers.py`: yt-dlp download → transcribe full cover → align section → trim → demucs → keep vocal
-- [ ] Test: ingest 2-3 covers for one song, verify vocal stems are the right section
+- [ ] Write `08_ingest_covers.py`: yt-dlp → transcribe → align → trim → demucs → keep vocal
+- [ ] Test: ingest 2-3 covers for one song
 - [ ] Output: `covers/{artist}_vocal.mp3` per track
 
-### 1.8 Assemble
+### 1.10 Assemble (later)
 
-- [ ] Write `08_assemble.py`: organize final folder structure, write `meta.json` per track
+- [ ] Write `09_assemble.py`: organize final folder structure, write `meta.json` per track
 - [ ] Write `run_all.py`: orchestrate all steps in order, resumable
-- [ ] End-to-end test: run full pipeline on 10 songs, verify complete output structure
-- [ ] Scale run: process the full initial batch
+- [ ] End-to-end test: full pipeline on 10 songs
+- [ ] Scale run: process the full collection
+
+## Stage 1.5: Pi Scaling (after Phase 1 is validated)
+
+- [ ] Set up Pi 5: Raspberry Pi OS 64-bit, Python 3.11+, librosa, ffmpeg
+- [ ] Plug SSD into Pi, run 01-03 on Pi (overnight batch)
+- [ ] Mac pulls trimmed clips from Pi, runs 04 (demucs) in batch
+- [ ] manifest.jsonl is the handoff contract between Pi and Mac
 
 ## Stage 2: Web Application
 
@@ -97,3 +138,4 @@ Evolving document. Tasks are grouped by stage. Each task is a committable unit o
 - New tasks get added as we learn more during implementation
 - A task is "done" when it's committed and the test (if any) passes
 - If a task grows too large, split it into sub-tasks here
+- Python managed via `uv` (3.13). Demucs is an external CLI (pyenv 3.11, called via subprocess).

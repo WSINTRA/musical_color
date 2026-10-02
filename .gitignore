@@ -1,5 +1,8 @@
 # Data
-data/
+data/music/
+data/clips/
+data/manifest/
+data/tracks/
 
 # Python
 .venv/

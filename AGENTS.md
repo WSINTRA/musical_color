@@ -26,21 +26,31 @@ This project is built incrementally. Each task produces a committable chunk of w
 
 ```
 DATASET_IDEA/
+├── pyproject.toml          # uv project config + dependencies
+├── uv.lock                 # Lock file (committed for reproducibility)
 ├── SPEC.md                 # What we're building and why
 ├── AGENTS.md               # This file — how we build it
 ├── TASK_BREAKDOWN.md       # Evolving task list
 ├── pipeline/               # Data pipeline scripts
 │   ├── config.yaml
 │   ├── common/             # Shared utilities (logging, config loading, IO)
+│   │   ├── __init__.py
+│   │   ├── config.py
+│   │   ├── manifest.py
+│   │   └── logging_setup.py
 │   ├── 01_discover.py
 │   ├── 02_select_section.py
+│   ├── 03_trim.py
+│   ├── 04_separate.py
 │   ├── ...
 │   └── run_all.py
 ├── app/                    # Web application (Stage 2)
 ├── analysis/               # Graph queries, clustering, viz (Stage 3)
 ├── data/                   # Raw + processed data (gitignored)
+│   ├── music/              # Source audio (gitignored)
 │   ├── manifest/
-│   └── tracks/
+│   ├── clips/              # Trimmed + separated audio
+│   └── tracks/             # Final per-track bundles
 └── tests/                  # Test suites
 ```
 
@@ -53,9 +63,10 @@ DATASET_IDEA/
 
 ## Dependencies
 
-- Python: managed via `pyenv` (3.14). Use a project-level virtualenv in `.venv/`.
-- Package management: `pip` with a `requirements.txt` (or `pyproject.toml` if we adopt a build system later).
-- Pin versions for reproducibility. The pipeline must produce the same output given the same input.
+- Python: managed via `uv`. Project uses Python 3.13 (uv-managed). The `.venv/` is created and maintained by `uv`.
+- Project management: `pyproject.toml` for dependencies, `uv.lock` for reproducible installs. Use `uv add` / `uv remove` to manage packages.
+- Run pipeline scripts with `uv run pipeline/01_discover.py` (or equivalent).
+- **Demucs** is an external CLI tool installed in a separate pyenv 3.11 environment (it pulls in torch). Pipeline scripts call it via `subprocess`. Do NOT install torch/demucs in the project venv.
 - Node.js dependencies: `package.json` in `app/` when we get there.
 
 ## Things We Don't Do

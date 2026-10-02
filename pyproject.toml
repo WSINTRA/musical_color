@@ -1,0 +1,19 @@
+[project]
+name = "dataset-idea"
+version = "0.1.0"
+description = "Music to color dataset: pipeline, web app, and analysis"
+requires-python = ">=3.13"
+dependencies = [
+    "av>=12,<14",
+    "faster-whisper>=1.2.1",
+    "librosa>=1.0.0",
+    "mutagen>=1.48.1",
+    "numpy>=2.5.3",
+    "pyyaml>=6.0.3",
+    "soundfile>=0.14.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
