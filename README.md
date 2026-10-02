@@ -7,7 +7,7 @@ The dataset captures that association — color, song metadata, mode (instrument
 ## Stages
 
 1. **Data Pipeline** — Process a local music collection into per-track bundles: a trimmed 10-15s section, vocal and instrumental stems (via demucs), a transcript (faster-whisper), and verified lyrics for that section (LRCLIB).
-2. **Web App** — Interactive labeling: play a clip or show lyrics, user picks a color.
+2. **Web App** — Interactive labeling: play a clip or show lyrics, user picks a color. React + Vite + Mantine + TypeScript (frontend), Rust + axum (backend), LadybugDB (graph database).
 3. **Analysis** — Store labels in LadybugDB, compute color fingerprints per track, find clusters of color-related songs.
 
 ## Current State
@@ -57,8 +57,10 @@ uv run pipeline/06_verify_lyrics.py
 ## Project Structure
 
 ```
-├── pipeline/          # Data pipeline scripts (numbered stages)
+├── pipeline/          # Data pipeline scripts (Python, numbered stages)
 ├── app/               # Web application (Stage 2)
+│   ├── frontend/      # React + Vite + Mantine + TypeScript + TanStack Query
+│   └── backend/       # Rust + axum + lbug (LadybugDB)
 ├── analysis/          # Graph queries, clustering, viz (Stage 3)
 ├── data/              # Raw + processed data (gitignored)
 │   ├── music/         # Source audio

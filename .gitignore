@@ -3,6 +3,8 @@ data/music/
 data/clips/
 data/manifest/
 data/tracks/
+data/*.lbdb
+data/*.lbdb-wal
 
 # Python
 .venv/
@@ -12,7 +14,10 @@ __pycache__/
 
 # Node
 node_modules/
-app/.next/
+app/frontend/dist/
+
+# Rust
+app/backend/target/
 
 # OS
 .DS_Store

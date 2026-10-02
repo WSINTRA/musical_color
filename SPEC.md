@@ -74,25 +74,22 @@ tracks/{track_id}/
 - Scripts live in `pipeline/` as numbered stages
 - Configuration in a single `pipeline/config.yaml`
 
-## Stage 2: Web Application (Directional — Not Yet Decided)
+## Stage 2: Web Application
 
 The interactive app where users encounter clips/lyrics and select colors.
 
-**Decided:**
-- Web-based
-- 256×256 color grid (canvas-based picker)
-- HTML5 audio for clip playback
-- LocalStorage for tracking which tracks a user has already labeled (bit array)
+**Stack:**
+- **Frontend**: React + Vite + Mantine UI + TypeScript + TanStack Query
+- **Backend**: Rust (axum) + tower-http (static file serving, CORS)
+- **Database**: LadybugDB (embedded graph DB, Cypher dialect) via `lbug` crate
+- **Color picker**: Mantine `ColorPicker` component
+- **Audio**: HTML5 audio, served as static files from the Rust backend
+- **Client tracking**: LocalStorage (bit array of seen track IDs)
+
+**Behavior:**
 - Dataset grows over time — users get net-new content each visit
 - Confidence metric = time from palette activation to selection
-
-**Not yet decided (will be determined during implementation):**
-- Specific frontend framework
-- Backend architecture
-- How audio files are served at scale
-- Exact color-space mapping for the palette axes
-- Session length / batching strategy
-- Deployment target
+- Session flow: present item (clip or lyrics) → user selects color → submit → next
 
 ## Stage 3: Data Storage & Analysis (Directional)
 

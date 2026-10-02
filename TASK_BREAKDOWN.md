@@ -108,17 +108,22 @@ Evolving document. Tasks are grouped by stage. Each task is a committable unit o
 
 ## Stage 2: Web Application
 
-*(Tasks will be fleshed out as we get here. Tech stack not yet decided.)*
+Stack: React + Vite + Mantine + TS + TanStack Query (frontend), Rust + axum + lbug/LadybugDB (backend).
 
-- [ ] Decide tech stack (framework, backend approach, audio serving strategy)
-- [ ] Scaffold the project
-- [ ] Build color palette component (256×256 canvas grid)
-- [ ] Build audio player component (10s clip playback)
-- [ ] Build lyrics display + cover vocal toggle
-- [ ] Session flow (present item → collect color → next)
-- [ ] LocalStorage tracking (bit array of seen track IDs)
-- [ ] Label submission endpoint
-- [ ] Audio file serving (static or API)
+- [x] Decide tech stack (React/Vite/Mantine/TS/TanStack, Rust/axum, LadybugDB, Mantine ColorPicker)
+- [ ] Scaffold `app/frontend/` (Vite + React + Mantine + TS + TanStack Query)
+- [ ] Scaffold `app/backend/` (Rust + axum + lbug + tower-http)
+- [ ] Backend: init LadybugDB schema (tracks, labels, sessions tables)
+- [ ] Backend: seed tracks from `data/manifest/tracks.jsonl`
+- [ ] Backend: GET `/api/tracks` — return unlabeled tracks (exclude user's seen set)
+- [ ] Backend: POST `/api/labels` — submit color + timing + track_id
+- [ ] Backend: serve `data/clips/` as static files
+- [ ] Frontend: audio player component (HTML5, 10-15s clip)
+- [ ] Frontend: lyrics display component
+- [ ] Frontend: color picker (Mantine ColorPicker)
+- [ ] Frontend: session flow (fetch track → present → collect color → submit → next)
+- [ ] Frontend: LocalStorage tracking (bit array of seen track IDs)
+- [ ] Integration: end-to-end flow (load track, play clip, pick color, submit)
 
 ## Stage 3: Storage & Analysis
 
