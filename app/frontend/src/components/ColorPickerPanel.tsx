@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { ColorPicker, Group, Paper, Text } from '@mantine/core'
 
 interface ColorPickerPanelProps {
@@ -31,13 +31,16 @@ export function ColorPickerPanel({
           }
         }}
         format="hex"
-        channels={['hue', 'saturation', 'value']}
-        swatches={['#e535ab', '#40c7ff', '#61ddaa', '#8494a1', '#94bcff', '#ffb648']}
-        allowEmpty={false}
-        hideSelectors
-        shadowSize="0"
-        shadowOffset={0}
-        shadowColor="transparent"
+        swatches={[
+          '#e535ab',
+          '#40c7ff',
+          '#61ddaa',
+          '#8494a1',
+          '#94bcff',
+          '#ffb648',
+        ]}
+        swatchesPerRow={6}
+        fullWidth
       />
       <Group mt="md" justify="flex-end">
         <button

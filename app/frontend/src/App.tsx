@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation } from '@tanstack/react-query'
 import {
   Button,
   Center,
@@ -15,49 +15,62 @@ import { LyricsDisplay } from './components/LyricsDisplay'
 import { ColorPickerPanel } from './components/ColorPickerPanel'
 import type { Track } from './lib/api'
 
-function getSeenIds(): string[] {
+const PAGE_SIZE = 25
+
+function loadSeenIds(): string[] {
   const raw = localStorage.getItem('seen_track_ids')
   if (!raw) return []
   return JSON.parse(raw)
 }
 
-function markSeen(trackId: string) {
-  const seen = getSeenIds()
-  if (!seen.includes(trackId)) {
-    seen.push(trackId)
-    localStorage.setItem('seen_track_ids', JSON.stringify(seen))
-  }
+function loadResumeOffset(): number {
+  const raw = localStorage.getItem('resume_offset')
+  if (!raw) return 0
+  const value = Number(raw)
+  return Number.isFinite(value) && value >= 0 ? value : 0
+}
+
+function persistProgress(seen: Set<string>, offset: number) {
+  localStorage.setItem('seen_track_ids', JSON.stringify(Array.from(seen)))
+  localStorage.setItem('resume_offset', String(offset))
 }
 
 export default function App() {
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null)
   const [mode, setMode] = useState<'instrumental' | 'lyrics'>('instrumental')
   const [selectionStartTime, setSelectionStartTime] = useState<number | null>(null)
-  const queryClient = useQueryClient()
+  const [offset, setOffset] = useState<number>(loadResumeOffset())
 
-  const { data: tracks } = useQuery({
-    queryKey: ['tracks'],
-    queryFn: () => fetchTracks(getSeenIds()),
+  const [seen, setSeen] = useState<Set<string>>(new Set(loadSeenIds()))
+
+  const { data: page } = useQuery({
+    queryKey: ['tracks', offset],
+    queryFn: () => fetchTracks({ offset, limit: PAGE_SIZE }),
     staleTime: Infinity,
   })
 
   const submitMutation = useMutation({
     mutationFn: submitLabel,
     onSuccess: () => {
-      if (currentTrack) {
-        markSeen(currentTrack.track_id)
-        setCurrentTrack(null)
-        setSelectionStartTime(null)
-        queryClient.invalidateQueries({ queryKey: ['tracks'] })
-      }
+      if (!currentTrack) return
+      const next = new Set(seen)
+      next.add(currentTrack.track_id)
+      setSeen(next)
+      persistProgress(next, offset)
+      setCurrentTrack(null)
+      setSelectionStartTime(null)
     },
   })
 
   const handleNext = () => {
-    const unselected = tracks?.find((t) => !getSeenIds().includes(t.track_id))
+    const unselected = (page ?? []).find((t) => !seen.has(t.track_id))
     if (unselected) {
       setCurrentTrack(unselected)
       setSelectionStartTime(null)
+      return
+    }
+    if (page && page.length >= PAGE_SIZE) {
+      setOffset(offset + PAGE_SIZE)
     }
   }
 
@@ -78,7 +91,10 @@ export default function App() {
     setSelectionStartTime(null)
   }
 
-  if (!currentTrack && tracks && tracks.length === 0) {
+  const hasUnseen = (page ?? []).some((t) => !seen.has(t.track_id))
+  const done = page !== undefined && !hasUnseen && page.length < PAGE_SIZE
+
+  if (!currentTrack && done) {
     return (
       <Center h="100vh">
         <Stack align="center" gap="md">
@@ -92,7 +108,7 @@ export default function App() {
   if (!currentTrack) {
     return (
       <Center h="100vh">
-        <Button size="lg" onClick={handleNext} disabled={!tracks || tracks.length === 0}>
+        <Button size="lg" onClick={handleNext} disabled={done}>
           Start
         </Button>
       </Center>
@@ -125,11 +141,7 @@ export default function App() {
             src={`/clips/${currentTrack.track_id}_instrumental.mp3`}
           />
         ) : (
-          <LyricsDisplay
-            trackId={currentTrack.track_id}
-            sectionStart={currentTrack.section_start}
-            sectionEnd={currentTrack.section_end}
-          />
+          <LyricsDisplay trackId={currentTrack.track_id} />
         )}
 
         <ColorPickerPanel

@@ -1,5 +1,3 @@
-const API_BASE = ''
-
 export interface Track {
   track_id: string
   title: string
@@ -21,12 +19,17 @@ export interface LabelResponse {
   status: string
 }
 
-export async function fetchTracks(seenIds: string[]): Promise<Track[]> {
-  const params = new URLSearchParams()
-  for (const id of seenIds) {
-    params.append('ids[]', id)
-  }
-  const res = await fetch(`/api/tracks?${params.toString()}`)
+export interface TrackPageParams {
+  offset: number
+  limit: number
+}
+
+export async function fetchTracks(params: TrackPageParams): Promise<Track[]> {
+  const query = new URLSearchParams({
+    offset: String(params.offset),
+    limit: String(params.limit),
+  })
+  const res = await fetch(`/api/tracks?${query.toString()}`)
   if (!res.ok) throw new Error(`Failed to fetch tracks: ${res.status}`)
   return res.json()
 }
