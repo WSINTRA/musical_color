@@ -14,6 +14,11 @@ async fn main() {
 
     let state = db::AppState::new("data/music_color.lbdb").expect("failed to initialize LadybugDB");
 
+    let count = state
+        .seed_from_manifest("data/manifest/tracks.jsonl")
+        .expect("failed to seed manifest");
+    tracing::info!("seeded {count} tracks from manifest");
+
     let app = routes::build(state);
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3001));

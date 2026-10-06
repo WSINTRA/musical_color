@@ -8,7 +8,9 @@ use axum::{
 use tower_http::cors::{Any, CorsLayer};
 use tower_http::services::ServeDir;
 
-use crate::db::{get_double, get_int, get_string, AppState};
+use std::collections::HashSet;
+
+use crate::db::{get_double, get_string, AppState};
 use crate::models::{LabelInput, LabelResponse, Track};
 
 pub fn build(state: AppState) -> Router {
@@ -26,30 +28,46 @@ pub fn build(state: AppState) -> Router {
         .with_state(state)
 }
 
+const DEFAULT_PAGE_LIMIT: u32 = 25;
+const MAX_PAGE_LIMIT: u32 = 100;
+
 #[derive(Debug, serde::Deserialize)]
-struct SeenTracks {
+struct SeenPage {
     #[serde(default)]
     ids: Vec<String>,
+    #[serde(default)]
+    offset: u32,
+    #[serde(default)]
+    limit: u32,
 }
 
 async fn list_tracks(
     State(state): State<AppState>,
-    Query(seen): Query<SeenTracks>,
+    Query(page): Query<SeenPage>,
 ) -> Result<Json<Vec<Track>>, StatusCode> {
+    let limit =
+        if page.limit == 0 {
+            DEFAULT_PAGE_LIMIT
+        } else {
+            page.limit.min(MAX_PAGE_LIMIT)
+        };
+    let offset = page.offset;
+
     let rows = state
-        .query(
-            "MATCH (t:Track) RETURN t.track_id, t.title, t.artist, t.album, t.section_start, t.section_end",
-        )
+        .query(&format!(
+            "MATCH (t:Track) RETURN t.track_id, t.title, t.artist, t.album, t.section_start, t.section_end SKIP {offset} LIMIT {limit}",
+        ))
         .map_err(|e| {
             tracing::error!("query failed: {e}");
             StatusCode::INTERNAL_SERVER_ERROR
         })?;
 
+    let seen: HashSet<String> = page.ids.into_iter().collect();
     let tracks: Vec<Track> = rows
         .into_iter()
         .filter_map(|row| {
             let track_id = get_string(&row, 0)?;
-            if seen.ids.contains(&track_id) {
+            if seen.contains(&track_id) {
                 return None;
             }
             Some(Track {
@@ -99,20 +117,7 @@ async fn create_label(
     State(state): State<AppState>,
     Json(input): Json<LabelInput>,
 ) -> Result<Json<LabelResponse>, StatusCode> {
-    let label_id = {
-        let rows = state
-            .query("MATCH (l:Label) RETURN l.label_id")
-            .map_err(|e| {
-                tracing::error!("query failed: {e}");
-                StatusCode::INTERNAL_SERVER_ERROR
-            })?;
-        let max_id = rows
-            .iter()
-            .filter_map(|row| get_int(row, 0))
-            .max()
-            .unwrap_or(0);
-        max_id + 1
-    };
+    let label_id = state.next_label_id();
 
     let now = unix_timestamp();
     let safe_track = input.track_id.replace('\'', "''");
