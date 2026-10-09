@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import sys
 from pathlib import Path
 
@@ -9,9 +8,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "pipeline"))
 from common.manifest import (
     Track,
     compute_track_id,
+    merge_manifest,
     read_manifest,
     write_manifest,
-    merge_manifest,
 )
 
 

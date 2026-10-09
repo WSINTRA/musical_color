@@ -1,17 +1,16 @@
 use axum::{
+    Json, Router,
     extract::{Path, Query, State},
     http::StatusCode,
     routing::get,
-    Json,
-    Router,
 };
 use tower_http::cors::{Any, CorsLayer};
 use tower_http::services::ServeDir;
 
 use std::collections::HashSet;
 
-use crate::db::{get_double, get_string, AppState};
-use crate::models::{LabelInput, LabelResponse, Track};
+use crate::db::{AppState, get_double, get_string};
+use crate::models::{Health, LabelInput, LabelResponse, Track};
 
 pub fn build(state: AppState) -> Router {
     let cors = CorsLayer::new()
@@ -19,13 +18,24 @@ pub fn build(state: AppState) -> Router {
         .allow_methods(Any)
         .allow_headers(Any);
 
+    let clips_dir = std::env::var("CLIPS_DIR").unwrap_or_else(|_| "data/clips".to_string());
+
     Router::new()
+        .route("/api/health", get(health))
         .route("/api/tracks", get(list_tracks))
         .route("/api/tracks/{track_id}", get(get_track))
         .route("/api/labels", axum::routing::post(create_label))
-        .route_service("/clips", ServeDir::new("data/clips"))
+        .route_service("/clips", ServeDir::new(&clips_dir))
         .layer(cors)
         .with_state(state)
+}
+
+async fn health() -> Json<Health> {
+    let version = std::env::var("APP_VERSION").unwrap_or_default();
+    Json(Health {
+        status: "ok".into(),
+        version,
+    })
 }
 
 const DEFAULT_PAGE_LIMIT: u32 = 25;
@@ -45,12 +55,11 @@ async fn list_tracks(
     State(state): State<AppState>,
     Query(page): Query<SeenPage>,
 ) -> Result<Json<Vec<Track>>, StatusCode> {
-    let limit =
-        if page.limit == 0 {
-            DEFAULT_PAGE_LIMIT
-        } else {
-            page.limit.min(MAX_PAGE_LIMIT)
-        };
+    let limit = if page.limit == 0 {
+        DEFAULT_PAGE_LIMIT
+    } else {
+        page.limit.min(MAX_PAGE_LIMIT)
+    };
     let offset = page.offset;
 
     let rows = state

@@ -38,12 +38,8 @@ def test_section_avoids_intro_outro():
     mp3 = MUSIC_DIR / "005 The Beatles - Rubber Soul" / "04-Nowhere Man.mp3"
     start, end = select_section(str(mp3), 10, 15)
     track_duration = 169.6
-    assert start >= 0.10 * track_duration, (
-        f"Start {start} too early (min {0.10 * track_duration})"
-    )
-    assert end <= 0.85 * track_duration, (
-        f"End {end} too late (max {0.85 * track_duration})"
-    )
+    assert start >= 0.10 * track_duration, f"Start {start} too early (min {0.10 * track_duration})"
+    assert end <= 0.85 * track_duration, f"End {end} too late (max {0.85 * track_duration})"
 
 
 def test_known_song_picks_mid_section():
@@ -58,19 +54,15 @@ def test_known_song_picks_mid_section():
 
 def test_different_songs_get_different_sections():
     file_a = MUSIC_DIR / "005 The Beatles - Rubber Soul" / "04-Nowhere Man.mp3"
-    file_b = (
-        MUSIC_DIR
-        / "004 Bob Dylan - Highway 61 Revisited"
-        / "01-Like a Rolling Stone.mp3"
-    )
+    file_b = MUSIC_DIR / "004 Bob Dylan - Highway 61 Revisited" / "01-Like a Rolling Stone.mp3"
     start_a, end_a = select_section(str(file_a), 10, 15)
     start_b, end_b = select_section(str(file_b), 10, 15)
     assert (start_a, end_a) != (start_b, end_b)
 
 
 def test_compute_smoothed_rms_shape():
-    import numpy as np
     import librosa
+    import numpy as np
 
     y, _ = librosa.load(
         str(MUSIC_DIR / "005 The Beatles - Rubber Soul" / "04-Nowhere Man.mp3"),

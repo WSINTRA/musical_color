@@ -108,9 +108,7 @@ def run(config: Config, limit: int | None = None, track_id: str | None = None) -
 
     for i, track in enumerate(to_process):
         try:
-            start, end = select_section(
-                track.source_path, config.clip_min_s, config.clip_max_s
-            )
+            start, end = select_section(track.source_path, config.clip_min_s, config.clip_max_s)
             track.section_start = round(start, 3)
             track.section_end = round(end, 3)
             log.info(

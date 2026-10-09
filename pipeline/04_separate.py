@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import logging
 import shutil
 import subprocess
@@ -122,9 +121,7 @@ def run(config: Config, limit: int | None = None) -> None:
     track_by_id = {t.track_id: t for t in tracks}
 
     clips = sorted(clips_dir.glob("*.wav"))
-    clips = [
-        c for c in clips if not c.name.endswith(("_vocal.wav", "_instrumental.wav"))
-    ]
+    clips = [c for c in clips if not c.name.endswith(("_vocal.wav", "_instrumental.wav"))]
     if limit:
         clips = clips[:limit]
 
@@ -168,9 +165,7 @@ def run(config: Config, limit: int | None = None) -> None:
                 padded_path,
             )
 
-            vocal, instr = run_demucs(
-                padded_path, tmp_dir, config.demucs_path, config.demucs_model
-            )
+            vocal, instr = run_demucs(padded_path, tmp_dir, config.demucs_path, config.demucs_model)
 
             trim_output(vocal, offset, section_dur, vocal_out)
             trim_output(instr, offset, section_dur, instr_out)
@@ -191,9 +186,7 @@ def run(config: Config, limit: int | None = None) -> None:
 
     vocals = len(list(clips_dir.glob("*_vocal.mp3")))
     instrs = len(list(clips_dir.glob("*_instrumental.mp3")))
-    log.info(
-        "Done. %d vocal stems, %d instrumental stems in %s", vocals, instrs, clips_dir
-    )
+    log.info("Done. %d vocal stems, %d instrumental stems in %s", vocals, instrs, clips_dir)
 
 
 def main() -> None:

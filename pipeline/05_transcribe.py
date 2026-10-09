@@ -10,7 +10,6 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from common.config import Config, load_config
 from common.logging_setup import setup_logging
-from common.manifest import read_manifest
 
 MODEL_NAME = "medium.en"
 COMPUTE_TYPE = "int8"

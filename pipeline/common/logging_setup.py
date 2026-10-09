@@ -11,9 +11,7 @@ def setup_logging(name: str, log_file: str | Path | None = None) -> logging.Logg
         return logger
 
     logger.setLevel(logging.INFO)
-    fmt = logging.Formatter(
-        "%(asctime)s %(name)s %(levelname)s %(message)s", datefmt="%H:%M:%S"
-    )
+    fmt = logging.Formatter("%(asctime)s %(name)s %(levelname)s %(message)s", datefmt="%H:%M:%S")
 
     sh = logging.StreamHandler(sys.stderr)
     sh.setFormatter(fmt)

@@ -111,15 +111,9 @@ def run(config: Config, limit: int | None = None) -> list[Track]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Discover audio files and build manifest"
-    )
-    parser.add_argument(
-        "--config", default="pipeline/config.yaml", help="Path to config.yaml"
-    )
-    parser.add_argument(
-        "--limit", type=int, default=None, help="Process only first N files"
-    )
+    parser = argparse.ArgumentParser(description="Discover audio files and build manifest")
+    parser.add_argument("--config", default="pipeline/config.yaml", help="Path to config.yaml")
+    parser.add_argument("--limit", type=int, default=None, help="Process only first N files")
     args = parser.parse_args()
 
     setup_logging("discover")

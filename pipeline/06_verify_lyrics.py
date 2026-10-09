@@ -78,13 +78,9 @@ def extract_section_lines(
     section_start: float,
     section_end: float,
 ) -> list[str]:
-    matched = [
-        line["text"] for line in lines if section_start <= line["time"] < section_end
-    ]
+    matched = [line["text"] for line in lines if section_start <= line["time"] < section_end]
     if not matched:
-        nearest = (
-            min(lines, key=lambda l: abs(l["time"] - section_start)) if lines else None
-        )
+        nearest = min(lines, key=lambda line: abs(line["time"] - section_start)) if lines else None
         if nearest:
             idx = lines.index(nearest)
             matched = [lines[idx]["text"]]
@@ -143,9 +139,7 @@ def run(config: Config, limit: int | None = None) -> None:
 
         if synced:
             lines = parse_synced_lyrics(synced)
-            section_lines = extract_section_lines(
-                lines, track.section_start, track.section_end
-            )
+            section_lines = extract_section_lines(lines, track.section_start, track.section_end)
         else:
             section_lines = []
             log.warning(
@@ -158,9 +152,7 @@ def run(config: Config, limit: int | None = None) -> None:
             f.write(f"# {track.artist} - {track.title}\n")
             f.write(f"# Album: {track.album}\n")
             f.write(f"# LRCLIB artist: {matched_artist}\n")
-            f.write(
-                f"# Section: {track.section_start:.1f}s - {track.section_end:.1f}s\n"
-            )
+            f.write(f"# Section: {track.section_start:.1f}s - {track.section_end:.1f}s\n")
             f.write(f"# Matched lines: {len(section_lines)}\n\n")
             f.write("=== SECTION LYRICS ===\n")
             for line in section_lines:

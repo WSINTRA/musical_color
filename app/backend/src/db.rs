@@ -356,8 +356,7 @@ mod tests {
 
     #[test]
     fn test_list_tracks_paging() {
-        let tmp = std::env::temp_dir()
-            .join(format!("lbug_paging_{}", std::process::id()));
+        let tmp = std::env::temp_dir().join(format!("lbug_paging_{}", std::process::id()));
         std::fs::create_dir_all(&tmp).unwrap();
         let db_path = tmp.join("pg.lbdb");
         let manifest_path = tmp.join("tracks.jsonl");
@@ -382,8 +381,7 @@ mod tests {
 
     #[test]
     fn test_label_counter_seeding() {
-        let tmp = std::env::temp_dir()
-            .join(format!("lbug_counter_{}", std::process::id()));
+        let tmp = std::env::temp_dir().join(format!("lbug_counter_{}", std::process::id()));
         std::fs::create_dir_all(&tmp).unwrap();
         let db_path = tmp.join("ct.lbdb");
 

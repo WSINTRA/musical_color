@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import logging
-import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -11,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from common.config import Config, load_config
 from common.logging_setup import setup_logging
-from common.manifest import read_manifest, write_manifest
+from common.manifest import read_manifest
 
 
 def trim_clip(

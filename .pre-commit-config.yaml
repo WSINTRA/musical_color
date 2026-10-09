@@ -1,0 +1,28 @@
+# Install once:  uv run pre-commit install
+# (pre-commit is not a project dep; install the CLI if you don't have it:
+#  pip install pre-commit   or   brew install pre-commit)
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.10
+    hooks:
+      - id: ruff
+        name: ruff (python lint)
+        args: [--fix]
+      - id: ruff-format
+        name: ruff (python format)
+
+  - repo: local
+    hooks:
+      - id: biome
+        name: biome (frontend lint + format)
+        language: system
+        entry: sh -c 'cd app/frontend && npx --no-install biome check --write . && git add -A app/frontend'
+        files: ^app/frontend/
+        pass_filenames: false
+
+      - id: rustfmt
+        name: rustfmt (backend)
+        language: system
+        entry: sh -c 'cd app/backend && cargo fmt --all && git add -A app/backend'
+        files: ^app/backend/.*\.rs$
+        pass_filenames: false

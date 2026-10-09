@@ -1,5 +1,5 @@
+import { Paper, Stack, Text } from '@mantine/core'
 import { useQuery } from '@tanstack/react-query'
-import { Paper, Text, Stack } from '@mantine/core'
 import { fetchLyrics } from '../lib/api'
 
 interface LyricsDisplayProps {
@@ -33,8 +33,8 @@ export function LyricsDisplay({ trackId }: LyricsDisplayProps) {
 
   if (isLoading) {
     return (
-      <Paper p="xl" w="100%">
-        <Text c="dimmed" ta="center">
+      <Paper p='xl' w='100%'>
+        <Text c='dimmed' ta='center'>
           Loading lyrics...
         </Text>
       </Paper>
@@ -43,8 +43,8 @@ export function LyricsDisplay({ trackId }: LyricsDisplayProps) {
 
   if (!lines || lines.length === 0) {
     return (
-      <Paper p="xl" w="100%">
-        <Text c="dimmed" ta="center">
+      <Paper p='xl' w='100%'>
+        <Text c='dimmed' ta='center'>
           No lyrics available for this section.
         </Text>
       </Paper>
@@ -52,10 +52,11 @@ export function LyricsDisplay({ trackId }: LyricsDisplayProps) {
   }
 
   return (
-    <Paper p="xl" w="100%">
+    <Paper p='xl' w='100%'>
       <Stack gap={4}>
         {lines.map((line, i) => (
-          <Text key={i} size="lg" fw={500} lineClamp={1}>
+          // biome-ignore lint/suspicious/noArrayIndexKey: static, non-reorderable lyrics list
+          <Text key={i} size='lg' fw={500} lineClamp={1}>
             {line}
           </Text>
         ))}

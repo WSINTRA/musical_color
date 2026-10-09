@@ -23,3 +23,9 @@ pub struct LabelResponse {
     pub label_id: i64,
     pub status: String,
 }
+
+#[derive(Debug, Serialize)]
+pub struct Health {
+    pub status: String,
+    pub version: String,
+}

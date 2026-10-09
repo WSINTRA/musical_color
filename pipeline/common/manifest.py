@@ -60,10 +60,7 @@ def merge_manifest(existing: list[Track], new: list[Track]) -> list[Track]:
     by_id = {t.track_id: t for t in existing}
     for track in new:
         if track.track_id in by_id:
-            if (
-                track.section_start is None
-                and by_id[track.track_id].section_start is not None
-            ):
+            if track.section_start is None and by_id[track.track_id].section_start is not None:
                 track.section_start = by_id[track.track_id].section_start
                 track.section_end = by_id[track.track_id].section_end
             by_id[track.track_id] = track

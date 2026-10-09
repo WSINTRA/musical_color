@@ -1,0 +1,24 @@
+# Local dev stack: one container (nginx + Rust backend), dataset bind-mounted.
+#
+#   docker compose -f docker/docker-compose.yml up --build
+#   -> http://localhost:8080
+#
+# The dataset lives at ./data (repo root) and is mounted at /app/data inside
+# the container. The backend seeds LadybugDB from ./data/manifest/tracks.jsonl
+# on start; clips are served from ./data/clips.
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: musical-color:local
+    ports:
+      # Host 8080 keeps local dev clear of the Vite dev server (5173) and the
+      # bare backend port (3001). The container always listens on 3000.
+      - '8080:3000'
+    environment:
+      PORT: '3001'
+      APP_VERSION: local
+    volumes:
+      - ../data:/app/data
+    restart: unless-stopped

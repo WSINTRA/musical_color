@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-import subprocess
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "pipeline"))
 
-from common.manifest import read_manifest
 
 import importlib.util
 
@@ -19,9 +17,7 @@ def _load(name: str, path: Path):
     return mod
 
 
-_discover = _load(
-    "discover", Path(__file__).parent.parent / "pipeline" / "01_discover.py"
-)
+_discover = _load("discover", Path(__file__).parent.parent / "pipeline" / "01_discover.py")
 read_audio_metadata = _discover.read_audio_metadata
 scan_directory = _discover.scan_directory
 

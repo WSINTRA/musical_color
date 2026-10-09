@@ -1,5 +1,5 @@
-import { useState } from 'react'
 import { ColorPicker, Group, Paper, Text } from '@mantine/core'
+import { useState } from 'react'
 
 interface ColorPickerPanelProps {
   onColorSelect: (hex: string) => void
@@ -7,18 +7,14 @@ interface ColorPickerPanelProps {
   submitting: boolean
 }
 
-export function ColorPickerPanel({
-  onColorSelect,
-  onActivate,
-  submitting,
-}: ColorPickerPanelProps) {
+export function ColorPickerPanel({ onColorSelect, onActivate, submitting }: ColorPickerPanelProps) {
   const [value, setValue] = useState('#000000')
 
   return (
-    <Paper p="lg" withBorder>
-      <Group justify="space-between" align="center" mb="md">
+    <Paper p='lg' withBorder>
+      <Group justify='space-between' align='center' mb='md'>
         <Text fw={600}>Pick a color</Text>
-        <Text c="dimmed" size="sm">
+        <Text c='dimmed' size='sm'>
           {value}
         </Text>
       </Group>
@@ -30,20 +26,14 @@ export function ColorPickerPanel({
             onActivate()
           }
         }}
-        format="hex"
-        swatches={[
-          '#e535ab',
-          '#40c7ff',
-          '#61ddaa',
-          '#8494a1',
-          '#94bcff',
-          '#ffb648',
-        ]}
+        format='hex'
+        swatches={['#e535ab', '#40c7ff', '#61ddaa', '#8494a1', '#94bcff', '#ffb648']}
         swatchesPerRow={6}
         fullWidth
       />
-      <Group mt="md" justify="flex-end">
+      <Group mt='md' justify='flex-end'>
         <button
+          type='button'
           style={{
             background: '#0070f3',
             color: 'white',

@@ -1,19 +1,11 @@
+import { Button, Center, Container, Group, Stack, Text, Title } from '@mantine/core'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { useQuery, useMutation } from '@tanstack/react-query'
-import {
-  Button,
-  Center,
-  Container,
-  Group,
-  Stack,
-  Text,
-  Title,
-} from '@mantine/core'
-import { fetchTracks, submitLabel } from './lib/api'
 import { AudioPlayer } from './components/AudioPlayer'
-import { LyricsDisplay } from './components/LyricsDisplay'
 import { ColorPickerPanel } from './components/ColorPickerPanel'
+import { LyricsDisplay } from './components/LyricsDisplay'
 import type { Track } from './lib/api'
+import { fetchTracks, submitLabel } from './lib/api'
 
 const PAGE_SIZE = 25
 
@@ -96,10 +88,10 @@ export default function App() {
 
   if (!currentTrack && done) {
     return (
-      <Center h="100vh">
-        <Stack align="center" gap="md">
+      <Center h='100vh'>
+        <Stack align='center' gap='md'>
           <Title order={2}>All done!</Title>
-          <Text c="dimmed">You've labeled all available tracks.</Text>
+          <Text c='dimmed'>You've labeled all available tracks.</Text>
         </Stack>
       </Center>
     )
@@ -107,8 +99,8 @@ export default function App() {
 
   if (!currentTrack) {
     return (
-      <Center h="100vh">
-        <Button size="lg" onClick={handleNext} disabled={done}>
+      <Center h='100vh'>
+        <Button size='lg' onClick={handleNext} disabled={done}>
           Start
         </Button>
       </Center>
@@ -116,30 +108,26 @@ export default function App() {
   }
 
   return (
-    <Container size="sm" py="xl">
-      <Stack gap="xl">
-        <Group justify="space-between" align="center">
+    <Container size='sm' py='xl'>
+      <Stack gap='xl'>
+        <Group justify='space-between' align='center'>
           <div>
             <Title order={3}>{currentTrack.title}</Title>
-            <Text c="dimmed">
+            <Text c='dimmed'>
               {currentTrack.artist} — {currentTrack.album}
             </Text>
           </div>
           <Button
-            variant="outline"
+            variant='outline'
             onClick={handleToggleMode}
-            leftSection={
-              <Text size="sm">{mode === 'instrumental' ? '♪' : '📝'}</Text>
-            }
+            leftSection={<Text size='sm'>{mode === 'instrumental' ? '♪' : '📝'}</Text>}
           >
             {mode === 'instrumental' ? 'Instrumental' : 'Lyrics'}
           </Button>
         </Group>
 
         {mode === 'instrumental' ? (
-          <AudioPlayer
-            src={`/clips/${currentTrack.track_id}_instrumental.mp3`}
-          />
+          <AudioPlayer src={`/clips/${currentTrack.track_id}_instrumental.mp3`} />
         ) : (
           <LyricsDisplay trackId={currentTrack.track_id} />
         )}

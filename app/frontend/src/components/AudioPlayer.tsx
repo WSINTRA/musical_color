@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react'
 import { Button, Center, Group, Text } from '@mantine/core'
+import { useRef, useState } from 'react'
 
 interface AudioPlayerProps {
   src: string
@@ -22,11 +22,11 @@ export function AudioPlayer({ src }: AudioPlayerProps) {
 
   return (
     <Center>
-      <Group align="center" gap="md" w="100%">
+      <Group align='center' gap='md' w='100%'>
         <Button
-          variant="filled"
-          size="xl"
-          fw="bold"
+          variant='filled'
+          size='xl'
+          fw='bold'
           style={{ width: 64, height: 64, borderRadius: '50%' }}
           onClick={toggle}
           aria-label={playing ? 'Pause' : 'Play'}
@@ -42,7 +42,7 @@ export function AudioPlayer({ src }: AudioPlayerProps) {
             onEnded={() => setPlaying(false)}
             style={{ display: 'none' }}
           />
-          <Text size="sm" c="dimmed">
+          <Text size='sm' c='dimmed'>
             {playing ? 'Playing...' : 'Click play to listen'}
           </Text>
         </div>
